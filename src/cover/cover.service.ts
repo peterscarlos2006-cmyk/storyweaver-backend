@@ -56,9 +56,21 @@ export class CoverService {
     });
     if (!cover) throw new Error('Cover not found');
 
+    const currentMetadata =
+      project.metadata &&
+      typeof project.metadata === 'object' &&
+      !Array.isArray(project.metadata)
+        ? project.metadata
+        : {};
+
     await this.prisma.project.update({
       where: { id: projectId },
-      data: { metadata: { ...project.metadata, coverId: cover.id } },
+      data: {
+        metadata: {
+          ...currentMetadata,
+          coverId: cover.id,
+        },
+      },
     });
     return { success: true };
   }
