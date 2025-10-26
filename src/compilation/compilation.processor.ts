@@ -2,6 +2,7 @@ import { Processor, Process } from '@nestjs/bull';
 import { Job } from 'bullmq';
 import { PrismaService } from '../prisma/prisma.service';
 import { OpenAI } from 'openai';
+import { ConfigService } from '@nestjs/config';
 
 interface CompilationJobData {
   compilationId: string;
@@ -11,9 +12,16 @@ interface CompilationJobData {
 
 @Processor('compilation-queue')
 export class CompilationProcessor {
-  private openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  private openai: OpenAI;
 
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private configService: ConfigService,
+  ) {
+    this.openai = new OpenAI({
+      apiKey: this.configService.get<string>('OPENAI_API_KEY'),
+    });
+  }
 
   @Process('compile-story')
   async handleCompilation(job: Job<CompilationJobData>) {
