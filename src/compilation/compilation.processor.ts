@@ -18,9 +18,13 @@ export class CompilationProcessor {
     private prisma: PrismaService,
     private configService: ConfigService,
   ) {
-    this.openai = new OpenAI({
-      apiKey: this.configService.get<string>('OPENAI_API_KEY'),
-    });
+    const apiKey = this.configService.get<string>('OPENAI_API_KEY');
+    if (!apiKey) {
+      throw new Error(
+        'FATAL ERROR: The OPENAI_API_KEY is not configured. Please create a .env file in the project root and add the line: OPENAI_API_KEY=your-key-here',
+      );
+    }
+    this.openai = new OpenAI({ apiKey });
   }
 
   @Process('compile-story')
